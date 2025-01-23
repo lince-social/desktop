@@ -6,6 +6,9 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     # postgresql_17
     zig
+    pkg-config
+    SDL2
+    gcc
   ];
 
   # PGDATA = "${toString ./.}/.pg";
@@ -18,6 +21,7 @@ pkgs.mkShell {
     # echo "log_min_messages = warning" >> $PGDATA/postgresql.conf
     # echo "log_checkpoints = off" >> $PGDATA/postgresql.conf
 
+    export PKG_CONFIG_PATH=${pkgs.SDL2}/lib/pkgconfig
     cd ${toString ./.}
   '';
 }

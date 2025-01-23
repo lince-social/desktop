@@ -1,24 +1,37 @@
 const std = @import("std");
+const c = @cImport({
+    @cInclude("SDL2/SDL.h");
+});
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
+        std.debug.print("SDL_Init failed: {s}\n", .{c.SDL_GetError()});
+        return error.SDLInitializationFailed;
+    }
+    defer c.SDL_Quit();
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    const window = c.SDL_CreateWindow("Hello, Zig!", c.SDL_WINDOWPOS_CENTERED, c.SDL_WINDOWPOS_CENTERED, 1920, 1080, c.SDL_WINDOW_SHOWN) orelse {
+        std.debug.print("SDL_CreateWindow failed: {s}\n", .{c.SDL_GetError()});
+        return error.WindowCreationFailed;
+    };
+    defer c.SDL_DestroyWindow(window);
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    const renderer = c.SDL_CreateRenderer(window, -1, c.SDL_RENDERER_ACCELERATED) orelse {
+        std.debug.print("SDL_CreateRenderer failed: {s}\n", .{c.SDL_GetError()});
+        return error.RendererCreationFailed;
+    };
+    defer c.SDL_DestroyRenderer(renderer);
 
-    try bw.flush(); // don't forget to flush!
-}
+    mainLoop: while (true) {
+        var event: c.SDL_Event = undefined;
+        while (c.SDL_PollEvent(&event) != 0) {
+            if (event.type == c.SDL_QUIT) {
+                break :mainLoop;
+            }
+        }
 
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
+        _ = c.SDL_SetRenderDrawColor(renderer, 180, 180, 180, 180);
+        _ = c.SDL_RenderClear(renderer);
+        c.SDL_RenderPresent(renderer);
+    }
 }

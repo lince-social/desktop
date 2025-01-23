@@ -18,7 +18,7 @@ This is a highly experimental branch, using zig, the person writing this is lear
 If you have the tools installed to build it, run:
 
 ```bash
-# Dunno
+zig build-exe src/main.zig -lSDL2 -lc
 ```
 
 If you don't, you can install [Nix](https://nixos.org/download), then type on the directory you cloned it:
@@ -33,7 +33,11 @@ Or anywhere on your system:
 nix-shell /path/to/lince
 ```
 
-Then, run the command to build it.
+Then, run:
+
+```bash
+./main
+```
 
 ---
 
