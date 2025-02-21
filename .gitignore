@@ -1,9 +1,2 @@
-zig-out/
-.zig-cache
-/release/
-/debug/
-/build/
-/build-*/
-/docgen_tmp/
-main.o
-main
+/target
+/sandbox
